@@ -1,3 +1,6 @@
+## Script to convert mp3 files into tonnetz arrays for insertion into NN ## 
+## Not finalized or referenced yet ## 
+
 import librosa
 import numpy as np
 import os
