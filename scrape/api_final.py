@@ -11,7 +11,7 @@ import alltags
 import tag_map
 import time
 
-# Configuration
+# Configuration (more parameters in fetch_tracks())
 API_URL = "https://api.jamendo.com/v3.0/tracks/"
 API_KEY = api_certs.client_id
 SAVE_DIR = "/volumes/data/mp3_files"
@@ -19,6 +19,7 @@ DB_PATH = "/volumes/data/final_tracks.db"
 LIMIT = 200  # Max items per API request
 MAX_TRACKS = 5004  # Target number of tracks in final_tracks.db
 TAG_LIST = set(alltags.alltags)  # Convert to set for faster lookup
+
 
 # Ensure directories exist
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -98,14 +99,15 @@ def insert_track(track_id, mood_tags):
 
 def fetch_tracks(offset=0):
     """Fetches track data from the Jamendo API in batches."""
+    ## Consult with the Jamendo API webpage for additional params
     params = {
         "client_id": API_KEY,
         "format": "json",
         "limit": min(LIMIT, MAX_TRACKS - get_existing_track_count()),
-        "offset": offset,
-        "include": "musicinfo",
-        "audioformat": "mp32",
-        "order": "downloads_total"
+        "offset": offset, ## How many tracks in to start from 
+        "include": "musicinfo", ## What info is included 
+        "audioformat": "mp32", ## Audio quality 
+        "order": "downloads_total" ## How the results are sorted
     }
     
     try:
