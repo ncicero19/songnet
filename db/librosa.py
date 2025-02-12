@@ -47,7 +47,7 @@ def process_mp3_files(folder_path, target_length=1000, db_path='tonnetz_database
     conn.commit()
     
     # Get all MP3 files in the folder
-    file_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.mp3')]
+    file_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.mp3') and not f.startswith("._")]
     
     for file_path in file_paths:
         # Extract the track ID (file name without extension)
