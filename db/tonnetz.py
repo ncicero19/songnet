@@ -32,14 +32,14 @@ def load_and_extract_tonnetz(file_path, target_length=1000):
     
     return tonnetz_normalized
 
-def process_mp3_files(folder_path, target_length=1000, db_path='tonnetz_database.db'):
+def process_mp3_files(folder_path, target_length=1000, db_path='/volumes/data/tonnetz.db'):
     # Connect to SQLite database (or create it if it doesn't exist)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     # Create a table to store Tonnetz arrays and track IDs
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tonnetz_data (
+        CREATE TABLE IF NOT EXISTS tonnetz (
             track_id TEXT PRIMARY KEY,
             tonnetz_array BLOB
         )
@@ -48,13 +48,13 @@ def process_mp3_files(folder_path, target_length=1000, db_path='tonnetz_database
     
     # Get all MP3 files in the folder
     file_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.mp3') and not f.startswith("._")]
-    
+    counter = 0
     for file_path in file_paths:
         # Extract the track ID (file name without extension)
         track_id = os.path.splitext(os.path.basename(file_path))[0]
         
         # Check if the track ID already exists in the database
-        cursor.execute('SELECT track_id FROM tonnetz_data WHERE track_id = ?', (track_id,))
+        cursor.execute('SELECT track_id FROM tonnetz WHERE track_id = ?', (track_id,))
         if cursor.fetchone() is not None:
             print(f"Track ID {track_id} already exists in the database. Skipping.")
             continue
@@ -67,11 +67,12 @@ def process_mp3_files(folder_path, target_length=1000, db_path='tonnetz_database
         
         # Insert the track ID and Tonnetz array into the database
         cursor.execute('''
-            INSERT INTO tonnetz_data (track_id, tonnetz_array)
+            INSERT INTO tonnetz (track_id, tonnetz_array)
             VALUES (?, ?)
         ''', (track_id, tonnetz_blob))
         conn.commit()
-        print(f"Inserted Tonnetz array for track ID: {track_id}")
+        print(f"Inserted {track_id}. {counter}/{len(file_paths)}")
+        counter += 1
     
     # Close the database connection
     conn.close()
