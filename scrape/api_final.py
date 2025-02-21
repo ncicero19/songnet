@@ -16,7 +16,7 @@ API_URL = "https://api.jamendo.com/v3.0/tracks/"
 API_KEY = api_certs.client_id
 SAVE_DIR = "/volumes/data/mp3_files"
 DB_PATH = "/volumes/data/final_tracks.db"
-LIMIT = 200  # Max items per API request
+LIMIT = 200  # Max items per API request (site limit is 200)
 MAX_TRACKS = 5004  # Target number of tracks in final_tracks.db
 TAG_LIST = set(alltags.alltags)  # Convert to set for faster lookup
 MIN_DURATION = 45 # Min song duration to keep. Set to 45 for NN input size 
@@ -33,7 +33,8 @@ def create_db():
         CREATE TABLE IF NOT EXISTS tracks (
             id INTEGER PRIMARY KEY,
             track_id TEXT UNIQUE,
-            mood_tags TEXT
+            mood_tags TEXT,
+            duration TEXT
         )
     """)
     conn.commit()
@@ -81,7 +82,7 @@ def download_mp3(track_id, url):
         print(f"Error downloading {track_id}: {e}")
         return None
 
-def insert_track(track_id, mood_tags):
+def insert_track(track_id, mood_tags, duration):
     """Inserts track metadata into the database."""
     if not mood_tags:
         print(f"{track_id} skipped -- bad data")
@@ -90,9 +91,9 @@ def insert_track(track_id, mood_tags):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT OR IGNORE INTO tracks (track_id, mood_tags)
-        VALUES (?, ?)
-    """, (track_id, ",".join(mood_tags)))
+        INSERT OR IGNORE INTO tracks (track_id, mood_tags, duration)
+        VALUES (?, ?, ?)
+    """, (track_id, ",".join(mood_tags), duration))
     conn.commit()
     inserted = cursor.rowcount > 0
     conn.close()
@@ -138,19 +139,19 @@ def process_tracks():
             
             track_id = track.get("id")
             if track_exists(track_id):
-                print(f"{track_id} already exists. Skip.")
+                print(f"Skipping {track_id} -- already exists")
                 continue
             
             mood_tags = track.get("musicinfo", {}).get("tags", {}).get("vartags", []) or []
             audio_url = track.get("audiodownload")
-            duration = track[0].get("duration", None)
+            duration = track.get("duration", None)
             
             if duration < MIN_DURATION:
                 print(f"Skipping {track_id} -- too short")
                 continue 
-            
+
             if not audio_url:
-                print(f"Skip {track_id} -- no download link")
+                print(f"Skipping {track_id} -- no download link")
                 continue
             
             mapped_moods = set()
@@ -166,7 +167,7 @@ def process_tracks():
             
             file_path = download_mp3(track_id, audio_url)
             if file_path:
-                if insert_track(track_id, list(mapped_moods)):
+                if insert_track(track_id, list(mapped_moods), duration):
                     remaining_tracks -= 1
                     print(f"{remaining_tracks} remaining.")
         
