@@ -1,0 +1,12 @@
+These are the requirements to run tonnetz.py. You have to open a virtual environment 
+by navigating to songnet/db and then running: 
+-- python3.11 -m venv venv 
+-- source venv/bin/activate 
+then you have to pip install the following packages (python can be ignored if you run python3.11 -m venv venv)
+
+
+python==3.11
+essentia
+numpy==1.26.4
+
+then you can run python3.11 tonnetz.py 

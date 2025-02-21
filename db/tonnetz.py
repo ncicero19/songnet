@@ -1,6 +1,7 @@
 ## Pipeline to create HPCP chromagrams from stored mp3_files ##
 ## Skips tracks that are too short (not enough frames) and duplicates##
 ## Uses hpcp.py to convert, the rest is just a pipeline ## 
+## SEE DEPENDENCIES.TXT FOR THE REQUIREMENTS TO RUN THIS SCRIPT ##
 
 import essentia.standard as es
 import numpy as np
@@ -61,7 +62,8 @@ def process_one_mp3(db_path=DB_PATH):
     file_paths = [os.path.join(FOLDER_PATH, f) for f in os.listdir(FOLDER_PATH) 
                   if f.endswith('.mp3') and not f.startswith("._")]
     total_files = len(file_paths)
-    print(f"Found {total_files} MP3 files.")
+    print(f"Found {total_files} files")
+    
     
     for file_path in file_paths:
         track_id = os.path.splitext(os.path.basename(file_path))[0]
@@ -93,7 +95,7 @@ def process_one_mp3(db_path=DB_PATH):
             print(f"Skipping {track_id}: {e}")
     
     conn.close()
-    print(f"Processing complete. {counter} arrays downloaded. {skip_counter} tracks of invalid length.")
+    print(f"Processing complete. {counter} arrays downloaded. Skipped {skip_counter} tracks of invalid length.")
 
 
 if __name__ == "__main__":
