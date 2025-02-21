@@ -6,7 +6,7 @@ then you have to pip install the following packages (python can be ignored if yo
 
 
 python==3.11
-essentia
+essentia==2.1b6.dev1110
 numpy==1.26.4
 
 then you can run python3.11 tonnetz.py 
