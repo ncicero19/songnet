@@ -1,7 +1,7 @@
 ## Final API Procedure. Processes data completely and loads into final_tracks.db and mp3_files ##
 ## Stores only track_id and relevant tags, mapped to a common theme ##
 ## Resistant to duplicates or network connectivity issues ## 
-## The bug had been creating a different table called mood_tracks with track_id and mood. Still need to remove ##
+
 
 import os
 import requests
@@ -19,6 +19,7 @@ DB_PATH = "/volumes/data/final_tracks.db"
 LIMIT = 200  # Max items per API request
 MAX_TRACKS = 5004  # Target number of tracks in final_tracks.db
 TAG_LIST = set(alltags.alltags)  # Convert to set for faster lookup
+MIN_DURATION = 45 # Min song duration to keep. Set to 45 for NN input size 
 
 
 # Ensure directories exist
@@ -142,6 +143,11 @@ def process_tracks():
             
             mood_tags = track.get("musicinfo", {}).get("tags", {}).get("vartags", []) or []
             audio_url = track.get("audiodownload")
+            duration = track[0].get("duration", None)
+            
+            if duration < MIN_DURATION:
+                print(f"Skipping {track_id} -- too short")
+                continue 
             
             if not audio_url:
                 print(f"Skip {track_id} -- no download link")
