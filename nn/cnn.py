@@ -1,15 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## CNN Architecture to be used by the train and test modules ## 
 
-
-=======
->>>>>>> 7e3ba94 (Add initial drafts of nn folder)
-=======
-## CNN Architecture to be used by the train and test modules ## 
-
-
->>>>>>> 9978d68 (Add preliminary draft of NN folder)
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

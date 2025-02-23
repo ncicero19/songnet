@@ -1,17 +1,9 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 9978d68 (Add preliminary draft of NN folder)
+
 ## Test Module ##
 ## Takes only the test portion of the dataset ## 
 ## Runs full set of test data and prints accuracy ##
 ## Also lets you print output for a single song at a time ## 
 
-<<<<<<< HEAD
-=======
->>>>>>> 7e3ba94 (Add initial drafts of nn folder)
-=======
->>>>>>> 9978d68 (Add preliminary draft of NN folder)
 import torch
 import torch.nn as nn
 import torch.utils.data as data
