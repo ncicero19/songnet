@@ -1,10 +1,16 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9978d68 (Add preliminary draft of NN folder)
 ## Train module ##
 ## Splits dataset into train and test with an 80/20 split ##
 ## Allows you to change number of epochs and prints test metrics ##
 
+<<<<<<< HEAD
 =======
 >>>>>>> 7e3ba94 (Add initial drafts of nn folder)
+=======
+>>>>>>> 9978d68 (Add preliminary draft of NN folder)
 import torch
 import torch.nn as nn
 import torch.optim as optim

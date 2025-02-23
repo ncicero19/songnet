@@ -1,14 +1,20 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9978d68 (Add preliminary draft of NN folder)
 ## Prepares data by turning it into .pt tensors and adding a dimension for color ## 
 ## The chromagraph dataset is 1 x 12 x 2500 x num_tracks and the key is 26 x 1 ##
 
 import sqlite3
 import torch
 import json
+<<<<<<< HEAD
 =======
 import sqlite3
 import torch
 >>>>>>> 7e3ba94 (Add initial drafts of nn folder)
+=======
+>>>>>>> 9978d68 (Add preliminary draft of NN folder)
 import numpy as np
 
 # Database paths
@@ -36,6 +42,7 @@ def load_data():
     common_tracks = sorted(chroma_tracks & tag_tracks)
     
     chroma_data, tag_data = [], []
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     for track_id in common_tracks:
@@ -86,34 +93,61 @@ def load_data():
     tags_conn.close()
 =======
     
+=======
+
+>>>>>>> 9978d68 (Add preliminary draft of NN folder)
     for track_id in common_tracks:
-        # Load chromagram data
-        chroma_cursor.execute("SELECT hpcp_array FROM hpcp WHERE track_id = ?", (track_id,))
-        chroma_blob = chroma_cursor.fetchone()[0]
-        chroma_array = np.frombuffer(chroma_blob, dtype=np.float32).reshape(12, 2500)
+        try:
+            # Load chromagram data
+            chroma_cursor.execute("SELECT hpcp_array FROM hpcp WHERE track_id = ?", (track_id,))
+            chroma_json = chroma_cursor.fetchone()
+            if not chroma_json or not chroma_json[0]:
+                print(f"Skipping {track_id}: Missing chroma data")
+                continue
+
+            chroma_array = np.array(json.loads(chroma_json[0]), dtype=np.float32)
+
+            if chroma_array.shape != (2500, 12):
+                print(f"Skipping {track_id}: Unexpected chroma shape {chroma_array.shape}")
+                continue
+            
+            # Load tag data
+            tags_cursor.execute("SELECT tag_array FROM tracks WHERE track_id = ?", (track_id,))
+            tag_string = tags_cursor.fetchone()
+            if not tag_string or not tag_string[0]:
+                print(f"Skipping {track_id}: Missing tag data")
+                continue
+
+            tag_array = np.array([float(x) for x in tag_string[0].split(",")], dtype=np.float32).reshape(26, 1)
+            
+            # Store tensors
+            chroma_data.append(torch.tensor(chroma_array, dtype=torch.float32))
+            tag_data.append(torch.tensor(tag_array, dtype=torch.float32))
         
-        # Load tag data
-        tags_cursor.execute("SELECT tag_array FROM tracks WHERE track_id = ?", (track_id,))
-        tag_blob = tags_cursor.fetchone()[0]
-        tag_array = np.frombuffer(tag_blob, dtype=np.float32).reshape(26, 1)
-        
-        # Store tensors
-        chroma_data.append(torch.tensor(chroma_array, dtype=torch.float32))
-        tag_data.append(torch.tensor(tag_array, dtype=torch.float32))
-    
-    # Stack into 3D tensors
-    chroma_tensor = torch.stack(chroma_data)
-    tag_tensor = torch.stack(tag_data)
-    
-    # Save as .pt file
-    torch.save({"chromagrams": chroma_tensor, "tags": tag_tensor}, OUTPUT_FILE)
-    
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"Skipping {track_id}: Data error - {e}")
+
+    if chroma_data and tag_data:
+        # Stack into 3D tensors
+        chroma_tensor = torch.stack(chroma_data)
+        tag_tensor = torch.stack(tag_data)
+
+        # Save as .pt file
+        torch.save({"chromagrams": chroma_tensor, "tags": tag_tensor}, OUTPUT_FILE)
+
+        print(f"✅ Processed {len(chroma_data)} tracks and saved to {OUTPUT_FILE}")
+    else:
+        print("⚠️ No valid data to save.")
+
     # Close connections
     chroma_conn.close()
     tags_conn.close()
+<<<<<<< HEAD
     
     print(f"Processed {len(common_tracks)} tracks and saved to {OUTPUT_FILE}")
 >>>>>>> 7e3ba94 (Add initial drafts of nn folder)
+=======
+>>>>>>> 9978d68 (Add preliminary draft of NN folder)
 
 if __name__ == "__main__":
     load_data()
