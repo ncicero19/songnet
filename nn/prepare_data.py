@@ -2,7 +2,7 @@
 ## Prepares data by turning it into .pt tensors and adding a dimension for color ## 
 ## The chromagraph dataset is 1 x 12 x 2500 x num_tracks and the key is 26 x 1 ##
 
-
+import json
 import sqlite3
 import torch
 import numpy as np
@@ -35,6 +35,7 @@ def load_data():
 
 
     for track_id in common_tracks:
+        counter = 0
         try:
             # Load chromagram data
             chroma_cursor.execute("SELECT hpcp_array FROM hpcp WHERE track_id = ?", (track_id,))
@@ -61,6 +62,8 @@ def load_data():
             # Store tensors
             chroma_data.append(torch.tensor(chroma_array, dtype=torch.float32))
             tag_data.append(torch.tensor(tag_array, dtype=torch.float32))
+            counter += 1
+            print(f"Track {counter} stored...")
         
         except (json.JSONDecodeError, ValueError) as e:
             print(f"Skipping {track_id}: Data error - {e}")
@@ -73,15 +76,13 @@ def load_data():
         # Save as .pt file
         torch.save({"chromagrams": chroma_tensor, "tags": tag_tensor}, OUTPUT_FILE)
 
-        print(f"✅ Processed {len(chroma_data)} tracks and saved to {OUTPUT_FILE}")
+        print(f"Processed {len(chroma_data)} tracks and saved to {OUTPUT_FILE}")
     else:
-        print("⚠️ No valid data to save.")
+        print("No valid data to save.")
 
     # Close connections
     chroma_conn.close()
     tags_conn.close()
-
-    print(f"Processed {len(common_tracks)} tracks and saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     load_data()
