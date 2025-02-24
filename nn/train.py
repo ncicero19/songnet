@@ -64,7 +64,27 @@ for epoch in range(num_epochs):
         running_loss += loss.item()
 
     avg_loss = running_loss / len(train_loader)
-    print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
+    
+    # Validation loop
+    model.eval()
+    val_loss = 0.0
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for batch in test_loader:
+            inputs, labels = batch
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+            predicted = (outputs > 0.5).float()
+            correct += (predicted == labels).sum().item()
+            total += labels.numel()
+    
+    avg_val_loss = val_loss / len(test_loader)
+    accuracy = correct / total
+    
+    print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}, Validation Loss: {avg_val_loss:.4f}, Accuracy: {accuracy:.4f}")
 
 # Save model
 torch.save(model.state_dict(), "chromagram_cnn_model.pt")
