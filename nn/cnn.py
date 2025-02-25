@@ -25,7 +25,7 @@ class ChromagramCNN(nn.Module):
         self.dropout = nn.Dropout(0.3)
 
         # Fully connected layers
-        self.fc1 = nn.Linear(128 * 3 * 625, 512)  # Adjusted for downsampled feature size
+        self.fc1 = nn.Linear(128 * 1 * 312, 512)  # Adjusted for downsampled feature size
         self.fc2 = nn.Linear(512, 26)  # Output layer (26 mood tags)
 
     def forward(self, x):
@@ -40,7 +40,7 @@ class ChromagramCNN(nn.Module):
         # Fully connected layers
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
-        x = torch.sigmoid(self.fc2(x))  # Sigmoid for multi-label classification
+        x = self.fc2(x)  # Sigmoid for multi-label classification
 
         return x
 

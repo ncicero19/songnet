@@ -34,7 +34,7 @@ class ChromagramDataset(data.Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.Y[idx]
 
-batch_size = 32  # Adjust based on memory
+batch_size = 16  # Adjust based on memory
 train_loader = data.DataLoader(ChromagramDataset(train_X, train_Y), batch_size=batch_size, shuffle=True)
 test_loader = data.DataLoader(ChromagramDataset(test_X, test_Y), batch_size=batch_size, shuffle=False)
 
@@ -42,8 +42,8 @@ test_loader = data.DataLoader(ChromagramDataset(test_X, test_Y), batch_size=batc
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ChromagramCNN().to(device)
 
-criterion = nn.BCELoss()  # Binary Cross Entropy Loss for multi-label classification
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+criterion = nn.BCEWithLogitsLoss()  # Binary Cross Entropy Loss for multi-label classification
+optimizer = optim.Adam(model.parameters(), lr=0.0001)                                                     
 
 # Training loop
 num_epochs = 20  # Adjust as needed
@@ -54,11 +54,16 @@ for epoch in range(num_epochs):
     for batch in train_loader:
         inputs, labels = batch
         inputs, labels = inputs.to(device), labels.to(device)
-        
+
         optimizer.zero_grad()
         outputs = model(inputs)
+        epsilon = 1e-6
+        outputs = torch.clamp(outputs, min=epsilon, max=1-epsilon)
+        loss = criterion(outputs, labels.squeeze(2))
+        labels = labels.squeeze(2)
         loss = criterion(outputs, labels)
         loss.backward()
+
         optimizer.step()
         
         running_loss += loss.item()
@@ -75,9 +80,12 @@ for epoch in range(num_epochs):
             inputs, labels = batch
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
+            outputs = torch.clamp(outputs, min=epsilon, max=1-epsilon)
+            labels = labels.squeeze(2)
             loss = criterion(outputs, labels)
             val_loss += loss.item()
             predicted = (outputs > 0.5).float()
+
             correct += (predicted == labels).sum().item()
             total += labels.numel()
     
@@ -87,7 +95,7 @@ for epoch in range(num_epochs):
     print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}, Validation Loss: {avg_val_loss:.4f}, Accuracy: {accuracy:.4f}")
 
 # Save model
-torch.save(model.state_dict(), "chromagram_cnn_model.pt")
+torch.save(model.state_dict(), "cnn_model.pt")
 print("Model training complete and saved.")
 
 # Evaluation
