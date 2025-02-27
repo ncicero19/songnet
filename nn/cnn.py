@@ -40,11 +40,10 @@ class ChromagramCNN(nn.Module):
         # Fully connected layers
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
-        x = self.fc2(x)  # Sigmoid for multi-label classification
+        x = torch.sigmoid(self.fc2(x))  # Sigmoid for multi-label classification
 
         return x
 
 # Model initialization
 model = ChromagramCNN()
-print(model)
 
